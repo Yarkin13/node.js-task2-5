@@ -6,9 +6,6 @@ const getAll = async () => {
 
 const get = async id => {
   const board = imitatedDB.getBoard(id);
-
-  if (!board) throw new Error(`The board with id: ${id} was not found`);
-
   return board;
 };
 

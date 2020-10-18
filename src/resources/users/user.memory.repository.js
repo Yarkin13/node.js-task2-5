@@ -1,14 +1,12 @@
 const imitatedDB = require('../../common/imitateDB');
 
 const getAll = async () => {
+  /* throw new Error(); */
   return imitatedDB.getAllUser();
 };
 
 const get = async id => {
   const user = imitatedDB.getUser(id);
-
-  if (!user) throw new Error(`The user with id: ${id} was not found`);
-
   return user;
 };
 
