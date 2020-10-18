@@ -1,6 +1,7 @@
 const User = require('../resources/users/user.model');
 const Board = require('../resources/boards/board.model');
 const Task = require('../resources/tasks/task.model');
+const NotFoundError = require('./NotFoundError');
 
 class DB {
   constructor() {
@@ -49,7 +50,9 @@ class DB {
   }
 
   getUser(id) {
-    return this.users.find(user => user.id === id);
+    const currentUser = this.users.find(user => user.id === id);
+    if (currentUser !== undefined) return currentUser;
+    throw new NotFoundError();
   }
 
   pushUser(user) {
@@ -59,26 +62,31 @@ class DB {
 
   putUser(id, newDataUser) {
     const oldUserDataIndex = this.users.findIndex(user => user.id === id);
-    this.users[oldUserDataIndex] = {
-      ...this.users[oldUserDataIndex],
-      ...newDataUser,
-      id: this.users[oldUserDataIndex].id
-    };
-    return this.users[oldUserDataIndex];
+    if (oldUserDataIndex !== -1) {
+      this.users[oldUserDataIndex] = {
+        ...this.users[oldUserDataIndex],
+        ...newDataUser,
+        id: this.users[oldUserDataIndex].id
+      };
+      return this.users[oldUserDataIndex];
+    }
+    throw new NotFoundError();
   }
 
   deleteUser(id) {
     const indexUserForDelete = this.users.findIndex(user => user.id === id);
-    this.users.splice(indexUserForDelete, 1);
-    if (this.tasks.length !== 0) {
-      this.tasks.map(task => {
-        if (task.userId === id) {
-          task.userId = null;
+    if (indexUserForDelete !== -1) {
+      this.users.splice(indexUserForDelete, 1);
+      if (this.tasks.length !== 0) {
+        this.tasks.map(task => {
+          if (task.userId === id) {
+            task.userId = null;
+            return task;
+          }
           return task;
-        }
-        return task;
-      });
-    }
+        });
+      }
+    } else throw new NotFoundError();
   }
 
   getAllBoards() {
@@ -86,7 +94,9 @@ class DB {
   }
 
   getBoard(id) {
-    return this.boards.find(board => board.id === id);
+    const currentBoard = this.boards.find(board => board.id === id);
+    if (currentBoard !== undefined) return currentBoard;
+    throw new NotFoundError();
   }
 
   pushBoard(board) {
@@ -96,22 +106,29 @@ class DB {
 
   putBoard(id, newDataBoard) {
     const oldBoardDataIndex = this.boards.findIndex(board => board.id === id);
-    this.boards[oldBoardDataIndex] = {
-      ...this.boards[oldBoardDataIndex],
-      ...newDataBoard,
-      id: this.boards[oldBoardDataIndex].id
-    };
-    return this.boards[oldBoardDataIndex];
+    if (oldBoardDataIndex !== -1) {
+      this.boards[oldBoardDataIndex] = {
+        ...this.boards[oldBoardDataIndex],
+        ...newDataBoard,
+        id: this.boards[oldBoardDataIndex].id
+      };
+      return this.boards[oldBoardDataIndex];
+    }
+    throw new NotFoundError();
   }
 
   deleteBoard(id) {
     const indexBoardForDelete = this.boards.findIndex(board => board.id === id);
-    this.boards.splice(indexBoardForDelete, 1);
-    this.tasks = this.tasks.filter(task => task.boardId !== id);
+    if (indexBoardForDelete !== -1) {
+      this.boards.splice(indexBoardForDelete, 1);
+      this.tasks = this.tasks.filter(task => task.boardId !== id);
+    } else throw new NotFoundError();
   }
 
   getAllTasks(boardId) {
-    return this.tasks.filter(task => task.boardId === boardId);
+    const tasks = this.tasks.filter(task => task.boardId === boardId);
+    if (tasks.length !== 0) return tasks;
+    throw new NotFoundError();
   }
 
   pushTask(task) {
@@ -120,29 +137,35 @@ class DB {
   }
 
   getTask(boardId, taskId) {
-    return this.tasks
-      .filter(task => task.boardId === boardId)
-      .find(task => task.id === taskId);
+    const currentTask = this.tasks.find(
+      task => task.id === taskId && task.boardId === boardId
+    );
+    if (currentTask !== undefined) return currentTask;
+    throw new NotFoundError();
   }
 
   putTask(boardId, taskId, newDataTask) {
     const indexTaskForUpdate = this.tasks.findIndex(
       task => task.id === taskId && task.boardId === boardId
     );
-    this.tasks[indexTaskForUpdate] = {
-      ...this.tasks[indexTaskForUpdate],
-      ...newDataTask,
-      id: this.tasks[indexTaskForUpdate].id
-    };
+    if (indexTaskForUpdate !== -1) {
+      this.tasks[indexTaskForUpdate] = {
+        ...this.tasks[indexTaskForUpdate],
+        ...newDataTask,
+        id: this.tasks[indexTaskForUpdate].id
+      };
 
-    return this.tasks[indexTaskForUpdate];
+      return this.tasks[indexTaskForUpdate];
+    }
+    throw new NotFoundError();
   }
 
   deleteTask(boardId, taskId) {
     const indexTaskForDelete = this.tasks.findIndex(
       task => task.id === taskId && task.boardId === boardId
     );
-    this.tasks.splice(indexTaskForDelete, 1);
+    if (indexTaskForDelete !== -1) this.tasks.splice(indexTaskForDelete, 1);
+    else throw new NotFoundError();
   }
 }
 

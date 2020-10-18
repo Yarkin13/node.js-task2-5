@@ -6,9 +6,6 @@ const getAll = async boardId => {
 
 const get = async (boardId, taskId) => {
   const task = imitatedDB.getTask(boardId, taskId);
-
-  if (!task) throw new Error(`The user with id: ${taskId} was not found`);
-
   return task;
 };
 
