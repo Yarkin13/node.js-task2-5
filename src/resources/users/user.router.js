@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const User = require('./user.model');
 const usersService = require('./user.service');
+const bcrypt = require('bcryptjs');
 
 router.route('/').get(async (req, res, next) => {
   try {
@@ -22,10 +23,14 @@ router.route('/:id').get(async (req, res, next) => {
 
 router.route('/').post(async (req, res, next) => {
   try {
+    // eslint-disable-next-line
+    const salt = bcrypt.genSaltSync(10);
+    const password = req.body.password;
     const user = await usersService.create(
       new User({
         login: req.body.login,
-        password: req.body.password,
+        // eslint-disable-next-line
+        password: bcrypt.hashSync(password, salt),
         name: req.body.name
       })
     );

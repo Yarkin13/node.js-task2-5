@@ -1,7 +1,7 @@
-const NotFoundError = require('./NotFoundError');
+const AnyError = require('./AnyError');
 
 const errorHandler = (err, req, res, next) => {
-  if (err instanceof NotFoundError) {
+  if (err instanceof AnyError) {
     res.status(err.status).send(err.message);
   } else {
     err.status = 500;
