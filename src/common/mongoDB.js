@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const User = require('../resources/users/user.model');
 const Board = require('../resources/boards/board.model');
 const { MONGO_CONNECTION_STRING } = require('../common/config');
 const Task = require('../resources/tasks/task.model');
 
+// eslint-disable-next-line
+const salt = bcrypt.genSaltSync(10);
+
 const users = [
   new User({
     name: 'admin',
     login: 'admin',
-    password: '123456'
+    // eslint-disable-next-line
+    password: bcrypt.hashSync('admin', salt)
   }),
   new User({
     name: 'user',

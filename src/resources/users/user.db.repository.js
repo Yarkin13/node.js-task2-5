@@ -1,4 +1,4 @@
-const NotFoundError = require('../../common/NotFoundError');
+const AnyError = require('../../common/AnyError');
 const Task = require('../tasks/task.model');
 const User = require('./user.model');
 
@@ -8,7 +8,7 @@ const getAll = async () => {
 
 const get = async id => {
   const user = await User.findOne({ _id: id });
-  if (!user) throw new NotFoundError();
+  if (!user) throw new AnyError(404, 'Not found');
   return user;
 };
 
@@ -19,7 +19,7 @@ const create = async user => {
 const put = async (id, newDataUser) => {
   const user = await User.findOne({ _id: id });
   if (user) return User.updateOne({ _id: id }, newDataUser);
-  throw new NotFoundError();
+  throw new AnyError(404, 'Not found');
 };
 
 const deleteUser = async id => {
@@ -27,7 +27,7 @@ const deleteUser = async id => {
   if (user) {
     await Task.updateMany({ userId: id }, { $set: { userId: null } });
     User.deleteOne({ _id: id });
-  } else throw new NotFoundError();
+  } else throw new AnyError(404, 'Not found');
 };
 
 module.exports = { getAll, get, create, put, deleteUser };
